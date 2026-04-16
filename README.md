@@ -1,75 +1,44 @@
-# React + TypeScript + Vite
+## Installation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run api
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Comptes de test
+- admin@taskflow.com / admin123
+- ali@taskflow.com / ali123
+- sara@taskflow.com / sara123
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# Réponses TP3
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Q1
+`<Navigate />` est utilisé dans le rendu d'un composant pour rediriger déclarativement. `navigate()` s'utilise dans un handler ou un effet.
+
+## Q2
+`navigate(from)` ajoute une nouvelle entrée dans l'historique. `navigate(from, { replace: true })` remplace l'entrée actuelle, donc le bouton Retour ne ramène pas vers `/login`.
+
+## Q3
+Après un POST, `setProjects(prev => [...prev, data])` met l'UI à jour immédiatement, évite une requête GET supplémentaire et garde une meilleure réactivité.
+
+## Q4
+- `/dashboard` sans être connecté : redirection vers `/login`
+- `/projects/1` sans être connecté : redirection vers `/login`
+- `/nimportequoi` : redirection vers `/dashboard`
+- `/` : redirection vers `/dashboard`
+- Connecté puis Retour : avec `replace: true`, on ne revient pas sur l'écran de login après connexion
+
+## Q5
+`<Link>` fait juste la navigation. `<NavLink>` sait aussi si le lien courant est actif, ce qui permet d'ajouter automatiquement un style actif. Ici il est utile pour surligner le projet sélectionné.
+
+## Q6
+Le composant est le même, mais :
+- en POST on part souvent d'un formulaire vide et on crée un nouveau projet
+- en PUT on pré-remplit le formulaire avec les données existantes puis on met à jour le projet ciblé
+
+## Q7
+Oui, si `json-server` est arrêté, Axios déclenche une erreur attrapée dans `catch`, puis le message est affiché dans l'interface.
+
+## Q8
+Avec Axios, lorsqu’une requête HTTP renvoie une erreur, comme une 404, la requête est considérée comme échouée et le traitement passe directement dans le bloc catch.
