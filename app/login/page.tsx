@@ -1,103 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-
-interface User {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-}
+import { useActionState } from 'react';
+import { login } from '../actions/auth';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('admin@taskflow.com');
-  const [password, setPassword] = useState('123456');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch(`http://localhost:4000/users?email=${encodeURIComponent(email)}`);
-
-      if (!res.ok) {
-        setError('Erreur serveur');
-        return;
-      }
-
-      const users: User[] = await res.json();
-
-      if (users.length === 0 || users[0].password !== password) {
-        setError('Email ou mot de passe incorrect');
-        return;
-      }
-
-      router.push('/dashboard');
-    } catch {
-      setError('Erreur serveur : vérifiez que json-server tourne sur le port 4000.');
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [state, formAction, pending] = useActionState(login, null);
 
   return (
-    <div style={{ padding: '2rem', maxWidth: 430, margin: '0 auto' }}>
+    <div style={{ padding: '3rem 1rem', maxWidth: 440, margin: '0 auto' }}>
       <div className="card">
-        <h1 style={{ color: '#1B8C3E', marginBottom: 4 }}>TaskFlow</h1>
-        <p style={{ marginTop: 0 }}>Connectez-vous pour continuer</p>
+        <h1 style={{ color: '#1B8C3E', marginTop: 0 }}>TaskFlow</h1>
+        <p>Connectez-vous pour continuer.</p>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {state?.error && (
+          <p style={{ color: '#b91c1c', background: '#fee2e2', padding: 10, borderRadius: 6 }}>
+            {state.error}
+          </p>
+        )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <label>
-            Email
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{ width: '100%', marginTop: 4, padding: 10, borderRadius: 6, border: '1px solid #ccc' }}
-            />
-          </label>
-
-          <label>
-            Mot de passe
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{ width: '100%', marginTop: 4, padding: 10, borderRadius: 6, border: '1px solid #ccc' }}
-            />
-          </label>
-
+        <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            defaultValue="admin@taskflow.com"
+            required
+            style={{ padding: 10, borderRadius: 6, border: '1px solid #ccc' }}
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Mot de passe"
+            defaultValue="password123"
+            required
+            style={{ padding: 10, borderRadius: 6, border: '1px solid #ccc' }}
+          />
           <button
             type="submit"
-            disabled={loading}
+            disabled={pending}
             style={{
               padding: 12,
               background: '#1B8C3E',
               color: 'white',
               border: 'none',
               borderRadius: 6,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
+              cursor: 'pointer',
+              fontWeight: 700
             }}
           >
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {pending ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
-
-        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 16 }}>
-          Compte de test : admin@taskflow.com / 123456
-        </p>
       </div>
     </div>
   );

@@ -1,65 +1,55 @@
-interface Project {
+import { notFound } from 'next/navigation';
+
+const BASE_URL = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+
+type Project = {
   id: string;
   name: string;
   color: string;
-  description?: string;
-  status?: string;
-  members?: string[];
+};
+
+async function getProject(id: string): Promise<Project | null> {
+  const res = await fetch(`${BASE_URL}/api/projects/${id}`, { cache: 'no-store' });
+
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('Impossible de charger le projet.');
+
+  return res.json();
 }
 
-interface Props {
-  params: Promise<{ id: string }> | { id: string };
-}
+export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const project = await getProject(id);
 
-async function resolveParams(params: Props['params']) {
-  return params instanceof Promise ? await params : params;
-}
-
-export default async function ProjectPage({ params }: Props) {
-  const { id } = await resolveParams(params);
-
-  const res = await fetch(`http://localhost:4000/projects/${id}`, {
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    return (
-      <div style={{ padding: '2rem' }}>
-        <section className="card">
-          <h1>Projet non trouvé</h1>
-          <p>Aucun projet avec l’identifiant {id} n’existe dans la base de données.</p>
-          <a href="/dashboard">← Retour au Dashboard</a>
-        </section>
-      </div>
-    );
-  }
-
-  const project: Project = await res.json();
+  if (!project) notFound();
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <section className="card">
-        <h1>
+    <div style={{ padding: '2rem', maxWidth: 820, margin: '0 auto' }}>
+      <a href="/dashboard" style={{ color: '#1B8C3E', fontWeight: 700 }}>
+        ← Retour au dashboard
+      </a>
+
+      <div className="card" style={{ marginTop: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span
             style={{
-              display: 'inline-block',
-              width: 16,
-              height: 16,
+              width: 24,
+              height: 24,
               borderRadius: '50%',
               background: project.color,
-              marginRight: 8,
+              display: 'inline-block'
             }}
           />
-          {project.name}
-        </h1>
-        <p><strong>ID :</strong> {project.id}</p>
-        {project.status && <p><strong>Statut :</strong> {project.status}</p>}
-        {project.description && <p><strong>Description :</strong> {project.description}</p>}
-        {project.members && (
-          <p><strong>Membres :</strong> {project.members.join(', ')}</p>
-        )}
-        <a href="/dashboard">← Retour au Dashboard</a>
-      </section>
+          <h1 style={{ margin: 0 }}>{project.name}</h1>
+        </div>
+
+        <dl style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '140px 1fr', gap: 12 }}>
+          <dt style={{ fontWeight: 700 }}>Identifiant</dt>
+          <dd style={{ margin: 0 }}>{project.id}</dd>
+          <dt style={{ fontWeight: 700 }}>Couleur</dt>
+          <dd style={{ margin: 0 }}>{project.color}</dd>
+        </dl>
+      </div>
     </div>
   );
 }
