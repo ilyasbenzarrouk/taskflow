@@ -1,132 +1,55 @@
-# TaskFlow - TP4
+# TaskFlow — TP5
 
-- React Router v6
-- Axios
-- Protected routes
-- CRUD complet des projets
-- Page détail projet
-- Navigation avec NavLink
-- Gestion loading / erreurs
-- Composants MUI et Bootstrap pour le TP4
 
-## Installation
+## Lancer le projet
 
 npm install
 npm run api
 npm run dev
 
 
-## Routes utiles
-- `/login` : login original TP3
-- `/login-mui` : login Material UI
-- `/login-bs` : login React-Bootstrap
-- `/tp4` : page de démonstration TP4
-- `/dashboard` : application principale
-
 ## Comptes de test
 - admin@taskflow.com / admin123
 - ali@taskflow.com / ali123
 - sara@taskflow.com / sara123
 
-## Réponses TP4
+## Réponses
 
-## Partie 1 — Header MUI
+**Q1 — JSX et XSS**  
+Non, le script ne s’exécute pas. React échappe les chaînes de caractères dans le JSX, donc le HTML est affiché comme du texte brut.
 
-### Q1 — Combien de lignes de CSS pour le Header MUI ?
-Pour `HeaderMUI`, j’ai écrit **0 ligne de CSS dédiée**.  
-Le style est géré directement avec `sx={{ ... }}` dans les composants Material UI.
+**Q2 — `dangerouslySetInnerHTML`**  
+L’HTML est injecté dans le DOM et peut s’exécuter. C’est dangereux avec des données utilisateur ou venant d’une API non maîtrisée.
 
-Dans le Header classique du TP3, `Header.module.css` contient **83 lignes** dans le fichier fourni, donc le passage à MUI réduit fortement la quantité de CSS externe.
+**Q3 — Header Authorization dans Network**  
+Oui, après un login réussi, les requêtes vers l’API portent le header `Authorization: Bearer ...` grâce à l’intercepteur Axios.
 
-## Partie 2 — Login MUI
+**Q4 — Token en mémoire et pas dans `localStorage`**  
+Le `localStorage` est accessible par n’importe quel script JavaScript de la page, donc plus exposé en cas de XSS. Le state Redux en mémoire est moins persistant et donc plus sûr.
 
-Le composant `LoginMUI.tsx` reprend la logique du login du TP3 :
-- `useState` pour `email` et `password`
-- appel Axios vers `/users?email=...`
-- vérification du mot de passe
-- `dispatch` des actions `LOGIN_START`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`
+**Q5 — Passage à Redux Toolkit**  
+On passe d’un `switch/case` manuel à `createSlice`. Les reducers paraissent mutables, mais Redux Toolkit utilise Immer pour produire un nouvel état immuable en coulisse.
 
-Le style est fait avec des composants MUI (`Box`, `Card`, `TextField`, `Button`, `Alert`) et `sx={{}}`.
+**Q6 — Re-renders au toggle de la sidebar**  
+Avant optimisation, `Header`, `Sidebar` et `MainContent` se re-rendent quand la sidebar change. `MainContent` est celui qui ne devrait pas se re-rendre, car il ne dépend pas de `sidebarOpen`.
 
-## Partie 3 — Header Bootstrap
+**Q7 — Pourquoi `MainContent` ne se re-rend plus**  
+`React.memo` compare les props par comparaison superficielle. Comme `columns` garde la même référence quand la sidebar change, `MainContent` est ignoré.
 
-### Q2 — Comparaison Header MUI vs Bootstrap
-Les deux sont lisibles, mais :
-- **Bootstrap** est souvent plus court pour ce type d’interface simple.
-- **MUI** est plus riche et plus cohérent visuellement grâce aux composants prêts à l’emploi et au système `sx`.
+**Q8 — `useMemo` vs `useCallback`**  
+`useMemo` mémorise une valeur calculée. `useCallback` mémorise une fonction. On utilise `useCallback` pour garder stable une fonction passée en props.
 
-En pratique :
-- **Bootstrap** = plus direct, plus proche du HTML + classes
-- **MUI** = plus structuré, plus flexible pour du design applicatif
+**Q10 — Profiler**  
+Cette partie dépend de vos mesures dans React DevTools. Il faut comparer avant / après `React.memo` et noter les temps de render observés dans votre environnement.
 
-## Partie 4 — Login Bootstrap
+## Structure importante
 
-Le composant `LoginBS.tsx` garde exactement la même logique que `LoginMUI.tsx`, mais remplace les composants par :
-- `Container`
-- `Card`
-- `Form`
-- `Button`
-- `Alert`
-
-### Q3 — `sx={{}}` ou `className` ?
-Je préfère **`sx={{}}` pour MUI** et **`className` pour Bootstrap** dans leurs contextes respectifs.
-
-Pourquoi :
-- `sx` est très pratique pour personnaliser vite un composant MUI sans créer de CSS séparé.
-- `className` est naturel avec Bootstrap, car le framework repose déjà sur des classes utilitaires.
-
-## Partie 5 — Tableau comparatif
-
-### Q4 — Une seule library en production ?
-Je choisirais **Material UI** pour TaskFlow en production, car :
-- l’UI est plus homogène,
-- la personnalisation est plus fine,
-- l’écosystème composants est très complet,
-- l’application ressemble davantage à une vraie app de gestion.
-
-## Partie 6 — Architecture Base de Données
-
-### Q5 — Pourquoi React ne peut pas se connecter directement à MySQL ?
-Parce que React tourne **dans le navigateur**.  
-Le navigateur ne doit pas exposer :
-- les identifiants MySQL,
-- le protocole natif de la base,
-- les règles métier sensibles.
-
-Il faut un **backend intermédiaire** (Express, PHP, Spring, etc.) pour sécuriser et contrôler l’accès.
-
-### Q6 — 3 raisons de ne pas utiliser json-server en production
-1. Ce n’est pas fait pour la sécurité et l’authentification réelle.
-2. Ce n’est pas une vraie couche backend métier robuste.
-3. Ce n’est pas adapté à la scalabilité, aux transactions et aux règles complexes.
-
-### Q7 — Pourquoi Firebase permet une connexion directe alors que MySQL non ?
-Firebase fournit un **SDK côté client** et des **services cloud** pensés pour être utilisés directement depuis une app front-end, avec des règles d’accès côté Firebase.
-
-MySQL, lui, est une base relationnelle qu’on ne doit pas exposer directement au navigateur.
-
-## Partie 7 — Réflexion
-
-### Q8 — Passage en production avec de vrais utilisateurs
-Étapes nécessaires :
-- remplacer json-server par un backend sécurisé,
-- ajouter authentification réelle,
-- gérer rôles et permissions,
-- valider les données côté serveur,
-- sécuriser les secrets,
-- mettre en place logs, monitoring et sauvegardes,
-- utiliser une vraie base de données de production.
-
-### Q9 — Risque de dépendre de bibliothèques externes
-Le risque principal est la dépendance :
-- taille du bundle plus grande,
-- changements de version,
-- breaking changes,
-- maintenance future plus difficile.
-
-### Q10 — App de chat en temps réel
-Pour une app de chat en temps réel, je choisirais **Firebase** ou un **backend custom avec WebSocket**.  
-`json-server` ne suffit pas, car il n’offre pas le temps réel.  
-Le meilleur choix dépend du niveau de contrôle voulu :
-- **Firebase** : rapide à mettre en place
-- **Backend custom** : plus flexible et plus professionnel
+- `src/api/axios.ts` : intercepteur token
+- `src/features/auth/authSlice.ts` : auth Redux Toolkit
+- `src/store.ts` : store Redux
+- `src/hooks/useProjects.ts` : logique CRUD
+- `src/components/Sidebar.tsx` : `React.memo`
+- `src/components/MainContent.tsx` : `React.memo`
+- `src/pages/Dashboard.tsx` : utilise le hook et Redux
+- `src/pages/ProjectDetail.tsx` : logout Redux
+- `src/main.tsx` : `Provider store={store}`
